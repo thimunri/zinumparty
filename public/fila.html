@@ -13,6 +13,8 @@
             font-family: Roboto;
             border: 4px solid #dedede;
             border-radius: 5px;
+            width: 100%;
+            padding: 5px;
         }
 
         .card-music-list {
@@ -26,15 +28,15 @@
 <body style="background-color: #CCCCCC">
     <div class="container" style="background-color:#FFFFFF">
         <div class="row">
-            <div class="col-12" style="text-align:center">
+            <div class="col-12" style="text-align:center; margin-top: 20px;">
                 <h2>Réveillon Tio Dedé - Playlist compartilhada</h2>
             </div>
         </div>
 
         <div class="row">
             <div class="col-12" style="text-align:center; margin-top:30px; margin-bottom:30px">
-                <input type="text" placeholder="Sua Busca" class="search-input" id="search-input" value="marilia"/>
-                <input type="button" class="btn btn-primary" value="Buscar" id="btn-search">
+                <input type="text" placeholder="Ex: Marília Mendonça" class="search-input" id="search-input" value=""/>
+                <input type="button" class="btn btn-primary" value="Buscar" id="btn-search" style="width: 100%; margin-top: 5px;">
             </div>
         </div>
         <div class="row">
@@ -48,6 +50,10 @@
         $('#btn-search').click(function(){
 
             if ($('#search-input').val()){
+
+
+                $('#btn-search').val('Buscando ...')
+
                 const options = {
 	                method: 'GET',
 	                headers: {
@@ -64,6 +70,10 @@
         })
     });
 
+    function searchError()
+    {
+
+    }
 
     function queueMusic(el)
     {
@@ -89,6 +99,7 @@
 
     function appendResults(response){
 
+        $('#btn-search').val('Buscar')
         $('#search-results').html('')
         table = $('<table></table>');
         response.result.songs.forEach(function(e){
