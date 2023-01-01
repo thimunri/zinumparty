@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <style>
+        .search-input {
+            font-size: 30px;
+            font-family: Roboto;
+            border: 4px solid #dedede;
+            border-radius: 5px;
+        }
+
+        .card-music-list {
+            font-size: 12px;
+            padding-left: 5px;
+            margin-top: -15px;
+        }
+    </style>
+    <title>Réveillon Tio Dedé</title>
+</head>
+<body style="background-color: #CCCCCC">
+    <div class="container" style="background-color:#FFFFFF">
+        <div class="row">
+            <div class="col-12" style="text-align:center">
+                <h2>Réveillon Tio Dedé - Playlist compartilhada</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12" style="text-align:center; margin-top:30px; margin-bottom:30px">
+                <input type="text" placeholder="Sua Busca" class="search-input" id="search-input" value="marilia"/>
+                <input type="button" class="btn btn-primary" value="Buscar" id="btn-search">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12" id="search-results">
+            </div>
+        </div>
+    </div>        
+</body>
+<script>
+    $(document).ready(function(){
+        $('#btn-search').click(function(){
+
+            if ($('#search-input').val()){
+                const options = {
+	                method: 'GET',
+	                headers: {
+		                'X-RapidAPI-Key': '360ebaf367msh5fed63ac2d8f242p1a1819jsn0812b377390e',
+		                'X-RapidAPI-Host': 'youtube-music1.p.rapidapi.com'
+	                }
+                };
+
+                fetch('https://youtube-music1.p.rapidapi.com/v2/search?query='+$('#search-input').val(), options)
+	            .then(response => response.json())
+	            .then(response => appendResults(response))
+	            .catch(err => console.error(err));                
+                }
+        })
+    });
+
+
+    function queueMusic(el)
+    {
+        let music_id = $(el).data('music-id');
+        let music_name = $(el).data('music-name');
+        let thumbnail = $(el).data('thumbnail');
+
+        fetch('/queue-music', {
+            method: 'POST', 
+            body: JSON.stringify({music_id: music_id, music_name:music_name, thumbnail: thumbnail}),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }})
+            .then(response => response.json())
+            .then(response => resultQueue(music_id))
+            .catch(err => console.log(err))
+    }
+
+    function resultQueue(response){
+        $('#m_'+response).html('<p>Música adicionada!</p>')
+    }
+
+    function appendResults(response){
+
+        $('#search-results').html('')
+        table = $('<table></table>');
+        response.result.songs.forEach(function(e){
+
+            artistName = e.artists[0].name
+            url   = e.thumbnail            
+            music_id = e.id
+            //card = $('<a href="javascript:void(0);" onclick=""  style="decoration:none"><div class="card" style="width: 5rem;"><img src="'+url+'"><div class="card-body"><h6>'+e.title+'</h6><p><strong>Artista:</strong> <p><strong>Álbum:</strong> '+e.album.name+'</p></div></div></a>')
+            tr = $('<tr id="m_'+music_id+'"></tr>');
+            $(tr)
+                .append('<td><img src="'+url+'" style="width: 60px;"/></td>')
+                .append('<td>' +
+                    '<p class="card-music-list"><strong>'+e.title+'</strong></p>' +
+                    '<p class="card-music-list">Álbum: '+e.album.name+'</p>' +
+                    '<p class="card-music-list">Artista: '+artistName+'</p>' +
+                    '</td>')
+            .append('<button class="btn btn-primary btn-sm" data-music-id="'+music_id+'" data-thumbnail="'+url+'" data-music-name="'+e.title+'" onclick="queueMusic(this)">adicionar</button>')
+            $(table).append(tr)
+        });
+
+        $('#search-results').append(table)
+    }
+</script>
+</html>

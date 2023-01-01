@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+  app:
+    working_dir: /www
+    build: 
+        context: ./
+        dockerfile: env/Dockerfile
+    volumes:
+      - ./:/www
+    environment:
+      - APP_ENV=local
+      - APP_VERSION=development
+      - PHP_IDE_CONFIG=serverName=zinumparty.local
+      - XDEBUG_ENABLE=true
+    expose:
+      - 9000
+    ports:
+      - "80:80"
+    links:
+      - database
+    networks:
+      - oms-zinumparty-network
+
+  database:
+    image: mysql:5.7
+    command: --sql_mode="NO_ENGINE_SUBSTITUTION"
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      - "MYSQL_DATABASE=zinumparty-db"
+      - "MYSQL_USER=zinumparty"
+      - "MYSQL_PASSWORD=zinumparty"
+      - "MYSQL_ROOT_PASSWORD=secret"
+      - "TZ=America/Sao_Paulo"
+    ports:
+      - "3306:3306"
+    networks:
+      - oms-zinumparty-network
+
+networks:
+  oms-zinumparty-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+  cachedata:
