@@ -21,6 +21,7 @@ $router->get('/fila', function () use ($router) {
     return file_get_contents($file_content);
 });
 
+$router->get('/search', 'MusicController@search');
 $router->get('list-queued-musics', 'MusicController@listQueue');
 $router->get('get-music-to-play', 'MusicController@getMusicToPlay');
 $router->post('/queue-music', 'MusicController@queue');

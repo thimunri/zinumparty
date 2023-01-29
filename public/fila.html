@@ -8,6 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
     <style>
+
+        body {
+            background-image: url('/images/background-3.jpg');
+            background-position: center;
+            background-attachment: fixed;
+
+        }
         .search-input {
             font-size: 30px;
             font-family: Roboto;
@@ -17,25 +24,34 @@
             padding: 5px;
         }
 
+        .search-results {
+            display: flex;
+            padding: 6px;
+            background-color: #fff;
+            margin-bottom: 3px;
+            border-radius: 6px;
+            opacity: 0.9;
+        }
+
         .card-music-list {
             font-size: 12px;
             padding-left: 5px;
             margin-top: -15px;
         }
     </style>
-    <title>Réveillon Tio Dedé</title>
+    <title>Dudu 4 Anos</title>
 </head>
-<body style="background-color: #CCCCCC">
-    <div class="container" style="background-color:#FFFFFF">
+<body >
+    <div class="container" >
         <div class="row">
             <div class="col-12" style="text-align:center; margin-top: 20px;">
-                <h2>Réveillon Tio Dedé - Playlist compartilhada</h2>
+            <img src="/images/logo-dudu.svg" style="width: 200px;">
             </div>
         </div>
 
         <div class="row">
             <div class="col-12" style="text-align:center; margin-top:30px; margin-bottom:30px">
-                <input type="text" placeholder="Ex: Marília Mendonça" class="search-input" id="search-input" value=""/>
+                <input type="text" placeholder="Ex: Marília Mendonça" value="" class="search-input" id="search-input" value=""/>
                 <input type="button" class="btn btn-primary" value="Buscar" id="btn-search" style="width: 100%; margin-top: 5px;">
             </div>
         </div>
@@ -50,19 +66,12 @@
         $('#btn-search').click(function(){
 
             if ($('#search-input').val()){
-
-
                 $('#btn-search').val('Buscando ...')
-
                 const options = {
-	                method: 'GET',
-	                headers: {
-		                'X-RapidAPI-Key': '360ebaf367msh5fed63ac2d8f242p1a1819jsn0812b377390e',
-		                'X-RapidAPI-Host': 'youtube-music1.p.rapidapi.com'
-	                }
+	                method: 'GET'
                 };
 
-                fetch('https://youtube-music1.p.rapidapi.com/v2/search?query='+$('#search-input').val(), options)
+                fetch('/search?q='+$('#search-input').val(), options)
 	            .then(response => response.json())
 	            .then(response => appendResults(response))
 	            .catch(err => console.error(err));                
@@ -93,34 +102,46 @@
             .catch(err => console.log(err))
     }
 
-    function resultQueue(response){
-        $('#m_'+response).html('<p>Música adicionada!</p>')
+    function resultQueue(music_id){
+        $('#'+music_id).fadeOut()
+        //$('#m_'+response).html('<p>Música adicionada!</p>')
     }
 
     function appendResults(response){
-
         $('#btn-search').val('Buscar')
         $('#search-results').html('')
-        table = $('<table></table>');
-        response.result.songs.forEach(function(e){
+        
+        
+        response.items.forEach(function(item){
 
-            artistName = e.artists[0].name
-            url   = e.thumbnail            
-            music_id = e.id
-            //card = $('<a href="javascript:void(0);" onclick=""  style="decoration:none"><div class="card" style="width: 5rem;"><img src="'+url+'"><div class="card-body"><h6>'+e.title+'</h6><p><strong>Artista:</strong> <p><strong>Álbum:</strong> '+e.album.name+'</p></div></div></a>')
-            tr = $('<tr id="m_'+music_id+'"></tr>');
-            $(tr)
-                .append('<td><img src="'+url+'" style="width: 60px;"/></td>')
-                .append('<td>' +
-                    '<p class="card-music-list"><strong>'+e.title+'</strong></p>' +
-                    '<p class="card-music-list">Álbum: '+e.album.name+'</p>' +
-                    '<p class="card-music-list">Artista: '+artistName+'</p>' +
-                    '</td>')
-            .append('<button class="btn btn-primary btn-sm" data-music-id="'+music_id+'" data-thumbnail="'+url+'" data-music-name="'+e.title+'" onclick="queueMusic(this)">adicionar</button>')
-            $(table).append(tr)
+            if (item.id.kind == 'youtube#video'){
+                musicId = item.id.videoId;
+                title   = item.snippet.title;
+                url     = item.snippet.thumbnails.default.url;
+
+                searchContainerDiv = $(`<div class="search-results" id="${musicId}" data-music-id="${musicId}" data-thumbnail="${url}" data-music-name="${title}" onclick="queueMusic(this)"></div>`);
+                searchContainerDiv.append(`<div><img src="${url}" style="width:60px"></div>`)
+                searchContainerDiv.append(`<div style="font-size:12px; padding-left:10px;">${title}</div>`)
+                
+                $('#search-results').append(searchContainerDiv)
+                //artistName = e.artists[0].name
+                //url   = e.thumbnail            
+                //card = $('<a href="javascript:void(0);" onclick=""  style="decoration:none"><div class="card" style="width: 5rem;"><img src="'+url+'"><div class="card-body"><h6>'+e.title+'</h6><p><strong>Artista:</strong> <p><strong>Álbum:</strong> '+e.album.name+'</p></div></div></a>')
+                /*tr = $('<tr id="m_'+musicId+'" style="background-color:#FFFFFF"></tr>');
+                $(tr)
+                    .append('<td><img src="'+url+'" style="width: 60px;"/></td>')
+                    .append('<td style="padding:5px">' +
+                        '<p class="card-music-list"><strong>'+title+'</strong></p>' +
+                        //'<p class="card-music-list">Álbum: </p>' +
+                        //'<p class="card-music-list">Artista: </p>' +
+                        '</td>')
+                .append('<td style="padding:5px;"><button class="btn btn-primary btn-sm" data-music-id="'+musicId+'" data-thumbnail="'+url+'" data-music-name="'+title+'" onclick="queueMusic(this)">adicionar</button></td>')
+               
+                $(table).append(tr)*/
+            }
         });
 
-        $('#search-results').append(table)
+        
     }
 </script>
 </html>

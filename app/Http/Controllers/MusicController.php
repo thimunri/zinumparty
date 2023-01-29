@@ -56,4 +56,18 @@ class MusicController extends Controller
             return new JsonResponse(['message' => $e->getMessage()], 400);
         }
     }
+
+    public function search(Request $request) {
+        try {
+            $q = $request->get('q');
+            $client = new \GuzzleHttp\Client(['base_uri' => 'https://youtube.googleapis.com/']);
+            $maxResults = 20;
+            $response = $client->request('GET', "youtube/v3/search?part=id&part=snippet&q={$q}&key=AIzaSyADAzSfJo76kfIgeXhhPTkKwxrDy9XIAOc&maxResults={$maxResults}");
+
+            echo $response->getBody()->getContents();
+        } catch (\Exception $e) {
+            die('error');
+        }
+
+    }
 }
